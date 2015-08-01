@@ -168,6 +168,11 @@ func ConfigureAuth(p Provisioner) error {
 		return err
 	}
 
+	// Tempory fix
+	if _, err = p.SSHCommand("ip link delete docker0"); err != nil {
+		return err
+	}
+
 	if err := p.Service("docker", pkgaction.Start); err != nil {
 		return err
 	}
