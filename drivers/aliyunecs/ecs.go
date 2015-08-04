@@ -4,14 +4,10 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"fmt"
+
 	"github.com/codegangsta/cli"
 	"github.com/denverdino/aliyungo/ecs"
 
-	"github.com/docker/machine/drivers"
-	"github.com/docker/machine/log"
-	"github.com/docker/machine/ssh"
-	"github.com/docker/machine/state"
-	"github.com/docker/machine/utils"
 	"io"
 	"io/ioutil"
 	"net"
@@ -20,6 +16,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/docker/machine/drivers"
+	"github.com/docker/machine/log"
+	"github.com/docker/machine/ssh"
+	"github.com/docker/machine/state"
+	"github.com/docker/machine/utils"
 	//"os"
 )
 
