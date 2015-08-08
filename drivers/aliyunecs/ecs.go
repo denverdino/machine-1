@@ -478,31 +478,47 @@ func (d *Driver) removeRouteEntry(vpcId string, regionId ecs.Region, instanceId 
 	describeRouteTablesArgs := ecs.DescribeRouteTablesArgs{
 		VRouterId: vrouterId,
 	}
+	count := 0
 
-	routeTables, _, err := client.DescribeRouteTables(&describeRouteTablesArgs)
-	if err != nil {
-		return fmt.Errorf("Failed to describe route tables: %v", err)
-	}
+	for {
+		found := false
 
-	routeEntries := routeTables[0].RouteEntrys.RouteEntry
+		routeTables, _, err := client.DescribeRouteTables(&describeRouteTablesArgs)
+		if err != nil {
+			return fmt.Errorf("Failed to describe route tables: %v", err)
+		}
 
-	// Fine route entry associated with instance
-	for _, routeEntry := range routeEntries {
-		log.Debugf("Route Entry %++v\n", routeEntry)
+		routeEntries := routeTables[0].RouteEntrys.RouteEntry
 
-		if routeEntry.InstanceId == instanceId {
-			deleteArgs := ecs.DeleteRouteEntryArgs{
-				RouteTableId:         routeEntry.RouteTableId,
-				DestinationCidrBlock: routeEntry.DestinationCidrBlock,
-				NextHopId:            routeEntry.InstanceId,
-			}
-			err := client.DeleteRouteEntry(&deleteArgs)
-			if err != nil {
-				return fmt.Errorf("Failed to delete route entry: %v", err)
+		// Fine route entry associated with instance
+		for _, routeEntry := range routeEntries {
+			log.Debugf("Route Entry %++v\n", routeEntry)
+
+			if routeEntry.InstanceId == instanceId {
+				found = true
+				deleteArgs := ecs.DeleteRouteEntryArgs{
+					RouteTableId:         routeEntry.RouteTableId,
+					DestinationCidrBlock: routeEntry.DestinationCidrBlock,
+					NextHopId:            routeEntry.InstanceId,
+				}
+				err := client.DeleteRouteEntry(&deleteArgs)
+				if err != nil {
+					log.Errorf("Failed to delete route entry: %v", err)
+				}
+				break
 			}
 		}
+		if found { // Wait route entry be removed
+			count++
+			if count <= _MAX_RETRY {
+				time.Sleep(5 * time.Second)
+			} else {
+				return fmt.Errorf("Failed to delete route entry after %d times", _MAX_RETRY)
+			}
+		} else {
+			break
+		}
 	}
-
 	return nil
 }
 
