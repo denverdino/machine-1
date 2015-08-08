@@ -100,6 +100,7 @@ manage \
 	swarmWorkerCmdTemplate := `sudo docker run -d \
 --restart=always \
 --name swarm-agent \
+-v /var/run/docker.sock:/var/run/docker.sock \
 {{.SwarmImage}} \
 join --advertise {{.Ip}}:{{.DockerPort}} {{.SwarmOptions.Discovery}}
 `
