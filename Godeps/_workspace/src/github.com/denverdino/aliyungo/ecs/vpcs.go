@@ -1,8 +1,9 @@
 package ecs
 
 import (
-	"github.com/denverdino/aliyungo/util"
 	"time"
+
+	"github.com/denverdino/aliyungo/util"
 )
 
 type CreateVpcArgs struct {
@@ -136,7 +137,7 @@ func (client *Client) WaitForVpcAvailable(regionId Region, vpcId string, timeout
 		if err != nil {
 			return err
 		}
-		if vpcs[0].Status == VpcStatusAvailable {
+		if len(vpcs) > 0 && vpcs[0].Status == VpcStatusAvailable {
 			break
 		}
 		timeout = timeout - DefaultWaitForInterval

@@ -3,12 +3,14 @@ package ecs
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/denverdino/aliyungo/util"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/denverdino/aliyungo"
+	"github.com/denverdino/aliyungo/util"
 )
 
 // ECSDefaultEndpoint is the default API endpoint of ECS services
@@ -84,6 +86,10 @@ func (client *Client) Invoke(action string, args interface{}, response interface
 	requestURL := ECSDefaultEndpoint + "?" + query.Encode() + "&Signature=" + url.QueryEscape(signature)
 
 	httpReq, err := http.NewRequest(ECSRequestMethod, requestURL, nil)
+
+	// TODO move to util and add build val flag
+	httpReq.Header.Set("X-SDK-Client", `AliyunGO/`+aliyungo.Version)
+
 	if err != nil {
 		return getECSError(err)
 	}
